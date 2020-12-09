@@ -1,0 +1,24 @@
+sudo: required
+services:
+  - docker
+
+before_install
+  - docker build -t WooSang/react-test -f ./client/Dockerfile.dev ./client/
+  
+script:
+  - docker run WooSang/react-test npm test -- --coverage
+
+after_suceess:
+  - docker build -t WooSang/multi-client ./client
+  - docker build -t WooSang/multi-nginx ./nginx
+  - docker build -t WooSang/multi-server ./server
+  - docker build -t WooSang/multi-worker ./worker 
+# Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+# Take those images and push
+  - docker push WooSang/multi-client
+  - docker push WooSang/multi-nginx
+  - docker push WooSang/multi-server
+  - docker push WooSang/multi-worker
+
+  
